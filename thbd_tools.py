@@ -12,7 +12,7 @@ DEFAULT_WORDLIST_FILENAME = "admin-finder.txt"
 DEFAULT_WORDLIST_PATH = os.path.join(SCRIPT_DIR, DEFAULT_WORDLIST_FILENAME)
 
 WORDLIST_DOWNLOAD_URL = "https://raw.githubusercontent.com/mrzico69/wordlists/main/admin-finder.txt"
-TOOL_UPDATE_URL = "https://raw.githubusercontent.com/mrzico69/wordlists/main/thbd_tools.py"
+TOOL_UPDATE_URL = "https://raw.githubusercontent.com/mrzico69/thbd_tools/refs/heads/main/thbd_tools.py"
 
 custom_wordlist_path = ""
 
