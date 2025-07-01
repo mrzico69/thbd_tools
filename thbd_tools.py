@@ -12,14 +12,14 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 # Wordlists
 DEFAULT_WORDLIST_FILENAME = "admin-finder.txt"
 DEFAULT_WORDLIST_PATH = os.path.join(SCRIPT_DIR, DEFAULT_WORDLIST_FILENAME)
-WORDLIST_DOWNLOAD_URL = "https://raw.githubusercontent.com/mrzico69/wordlists/main/admin-finder.txt"
+WORDLIST_DOWNLOAD_URL = "https://raw.githubusercontent.com/mrzico69/wordlists/refs/heads/main/admin-finder.txt"
 
 DIR_BRUTE_FILENAME = "dir-brute.txt"
 DIR_BRUTE_PATH = os.path.join(SCRIPT_DIR, DIR_BRUTE_FILENAME)
 DIR_BRUTE_URL = "https://raw.githubusercontent.com/mrzico69/wordlists/refs/heads/main/dir-brute.txt"
 
 # Update URLs
-TOOL_UPDATE_URL = "https://raw.githubusercontent.com/mrzico69/wordlists/main/thbd_tools.py"
+TOOL_UPDATE_URL = "https://raw.githubusercontent.com/mrzico69/thbd_tools/refs/heads/main/thbd_tools.py"
 
 # Dirsearch path
 DIRSEARCH_PATH = os.path.join(SCRIPT_DIR, "dirsearch", "dirsearch.py")
