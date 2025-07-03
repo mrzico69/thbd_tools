@@ -141,19 +141,19 @@ def get_random_user_agent():
 def print_banner():
     """Show tool banner."""
     banner = r"""
-█████████╗██╗  ██╗██████╗ ██████╗ 
+█████████╗██╗  ██╗██████╗ ██████╗ 
 ╚══██╔══╝██║  ██║██╔══██╗██╔══██╗
    ██║   ███████║██████╔╝██║  ██║
    ██║   ██╔══██║██╔══██╗██║  ██║
    ██║   ██║  ██║██████╔╝██████╔╝
-   ╚═╝   ╚═╝  ╚═╝╚═════╝ ╚═════╝  
+   ╚═╝   ╚═╝  ╚═╝╚═════╝ ╚═════╝  
 """
     print(
         Fore.CYAN
         + Style.BRIGHT
         + banner
         + Fore.YELLOW
-        + "        TOOLS by Team THBD ⚡\n"
+        + "        TOOLS by THBD Community ⚡\n"
         + Style.RESET_ALL
     )
 
@@ -379,12 +379,176 @@ def login_bruteforce():
 
 
 # =====================
-# === YOU CAN ADD YOUR EXISTING ADMIN FINDER, DIR BRUTE FORCE, COMBO, UPDATE FUNCTIONS HERE ===
-# (For brevity not repeated here; add your current code for those features)
+# === FEATURE 5: Admin Finder ===
 # =====================
 
-# === MAIN MENU ===
+def admin_finder_menu():
+    print(Fore.MAGENTA + "\n[🕵️] Admin Page Finder\n" + Style.RESET_ALL)
+    target = input("Enter target URL (e.g. example.com): ").strip()
+    if not target.startswith("http"):
+        target = "http://" + target
 
+    ensure_wordlists()
+
+    try:
+        with open(DEFAULT_WORDLIST_PATH, "r") as file:
+            paths = [line.strip() for line in file if line.strip()]
+    except Exception as e:
+        print(Fore.RED + f"[✗] Could not load admin finder wordlist: {e}" + Style.RESET_ALL)
+        return
+
+    print(Fore.YELLOW + f"[*] Starting Admin Finder on {target}..." + Style.RESET_ALL)
+
+    headers = {"User-Agent": get_random_user_agent()}
+
+    found = []
+
+    for path in paths:
+        url = target.rstrip("/") + "/" + path.lstrip("/")
+        try:
+            response = requests.get(url, headers=headers, timeout=10)
+            if response.status_code == 200:
+                print(Fore.GREEN + f"[✓] Found admin page: {url}" + Style.RESET_ALL)
+                found.append(url)
+            else:
+                print(Fore.BLUE + f"[-] Not found: {url}" + Style.RESET_ALL)
+        except Exception as e:
+            print(Fore.RED + f"[✗] Request error: {e}" + Style.RESET_ALL)
+
+    if not found:
+        print(Fore.YELLOW + "[!] No admin pages found." + Style.RESET_ALL)
+    else:
+        print(Fore.GREEN + f"[✓] Total admin pages found: {len(found)}" + Style.RESET_ALL)
+
+
+# ========================
+# === FEATURE 6: Dir Brute Force ===
+# ========================
+
+def dir_brute_menu():
+    print(Fore.MAGENTA + "\n[🗂️] Directory Brute Force\n" + Style.RESET_ALL)
+    target = input("Enter target URL (e.g. example.com): ").strip()
+    if not target.startswith("http"):
+        target = "http://" + target
+
+    ensure_wordlists()
+
+    try:
+        with open(DIR_BRUTE_PATH, "r") as file:
+            paths = [line.strip() for line in file if line.strip()]
+    except Exception as e:
+        print(Fore.RED + f"[✗] Could not load dir brute wordlist: {e}" + Style.RESET_ALL)
+        return
+
+    print(Fore.YELLOW + f"[*] Starting Directory Brute Force on {target}..." + Style.RESET_ALL)
+
+    headers = {"User-Agent": get_random_user_agent()}
+
+    found = []
+
+    for path in paths:
+        url = target.rstrip("/") + "/" + path.lstrip("/")
+        try:
+            response = requests.get(url, headers=headers, timeout=10)
+            if response.status_code == 200:
+                print(Fore.GREEN + f"[✓] Found directory/page: {url}" + Style.RESET_ALL)
+                found.append(url)
+            else:
+                print(Fore.BLUE + f"[-] Not found: {url}" + Style.RESET_ALL)
+        except Exception as e:
+            print(Fore.RED + f"[✗] Request error: {e}" + Style.RESET_ALL)
+
+    if not found:
+        print(Fore.YELLOW + "[!] No directories or pages found." + Style.RESET_ALL)
+    else:
+        print(Fore.GREEN + f"[✓] Total directories/pages found: {len(found)}" + Style.RESET_ALL)
+
+
+# ========================
+# === FEATURE 7: Combo Attack (Admin + Dir Brute) ===
+# ========================
+
+def combo_attack():
+    print(Fore.MAGENTA + "\n[⚔️] Combo Attack (Admin Finder + Dir Brute Force)\n" + Style.RESET_ALL)
+    target = input("Enter target URL (e.g. example.com): ").strip()
+    if not target.startswith("http"):
+        target = "http://" + target
+
+    ensure_wordlists()
+
+    # Load both wordlists
+    try:
+        with open(DEFAULT_WORDLIST_PATH, "r") as file:
+            admin_paths = [line.strip() for line in file if line.strip()]
+    except Exception as e:
+        print(Fore.RED + f"[✗] Could not load admin finder wordlist: {e}" + Style.RESET_ALL)
+        return
+
+    try:
+        with open(DIR_BRUTE_PATH, "r") as file:
+            dir_paths = [line.strip() for line in file if line.strip()]
+    except Exception as e:
+        print(Fore.RED + f"[✗] Could not load dir brute wordlist: {e}" + Style.RESET_ALL)
+        return
+
+    print(Fore.YELLOW + f"[*] Starting Combo Attack on {target}..." + Style.RESET_ALL)
+
+    headers = {"User-Agent": get_random_user_agent()}
+
+    found = []
+
+    all_paths = admin_paths + dir_paths
+
+    for path in all_paths:
+        url = target.rstrip("/") + "/" + path.lstrip("/")
+        try:
+            response = requests.get(url, headers=headers, timeout=10)
+            if response.status_code == 200:
+                print(Fore.GREEN + f"[✓] Found: {url}" + Style.RESET_ALL)
+                found.append(url)
+            else:
+                print(Fore.BLUE + f"[-] Not found: {url}" + Style.RESET_ALL)
+        except Exception as e:
+            print(Fore.RED + f"[✗] Request error: {e}" + Style.RESET_ALL)
+
+    if not found:
+        print(Fore.YELLOW + "[!] No admin pages or directories found." + Style.RESET_ALL)
+    else:
+        print(Fore.GREEN + f"[✓] Total found: {len(found)}" + Style.RESET_ALL)
+
+
+# =====================
+# === UPDATE FUNCTIONS ===
+# =====================
+
+def update_tool():
+    print(Fore.MAGENTA + "\n[⬆️] Updating tool...\n" + Style.RESET_ALL)
+    try:
+        response = requests.get(TOOL_UPDATE_URL, timeout=20)
+        response.raise_for_status()
+        with open(__file__, "wb") as f:
+            f.write(response.content)
+        print(Fore.GREEN + "[✓] Tool updated successfully. Please restart the program." + Style.RESET_ALL)
+        sys.exit(0)
+    except Exception as e:
+        print(Fore.RED + f"[✗] Tool update failed: {e}" + Style.RESET_ALL)
+
+
+def update_wordlist():
+    print(Fore.MAGENTA + "\n[⬆️] Updating default wordlists...\n" + Style.RESET_ALL)
+    try:
+        download_file(WORDLIST_DOWNLOAD_URL, DEFAULT_WORDLIST_PATH)
+        download_file(DIR_BRUTE_URL, DIR_BRUTE_PATH)
+        download_file(DEFAULT_USR_URL, DEFAULT_USR_PATH)
+        download_file(DEFAULT_PASS_URL, DEFAULT_PASS_PATH)
+        print(Fore.GREEN + "[✓] Wordlists updated successfully." + Style.RESET_ALL)
+    except Exception as e:
+        print(Fore.RED + f"[✗] Wordlist update failed: {e}" + Style.RESET_ALL)
+
+
+# =====================
+# === MAIN MENU ===
+# =====================
 
 def main_menu():
     while True:
@@ -404,11 +568,11 @@ def main_menu():
         choice = input("\nYour choice: ").strip()
 
         if choice == "1":
-            admin_finder_menu()  # Your existing function
+            admin_finder_menu()
         elif choice == "2":
-            dir_brute_menu()  # Your existing function
+            dir_brute_menu()
         elif choice == "3":
-            combo_attack()  # Your existing function
+            combo_attack()
         elif choice == "4":
             target = input("Enter target URL (e.g. example.com): ").strip()
             cms_detector(target)
@@ -423,11 +587,11 @@ def main_menu():
         elif choice == "7":
             login_bruteforce()
         elif choice == "8":
-            update_tool()  # Your existing function
+            update_tool()
         elif choice == "9":
-            update_wordlist()  # Your existing function
+            update_wordlist()
         elif choice == "0":
-            print(Fore.CYAN + "👋 Bye! Stay sharp, Team THBD 💻⚔️" + Style.RESET_ALL)
+            print(Fore.CYAN + "👋 Bye! Stay sharp, THBD Community 💻⚔️" + Style.RESET_ALL)
             break
         else:
             print(Fore.RED + "❌ Invalid option." + Style.RESET_ALL)
