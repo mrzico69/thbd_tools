@@ -6,6 +6,116 @@ import time
 from urllib.parse import urlparse
 from colorama import init, Fore, Style
 
+#auto update
+
+# Your current local versions
+import os
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+TOOL_VERSION = "3.0"
+
+try:
+    with open(os.path.join(SCRIPT_DIR, "wordlist_version_local.txt"), "r") as f:
+        WORDLIST_VERSION = f.read().strip()
+except FileNotFoundError:
+    WORDLIST_VERSION = "0.0"  # default if not present
+
+# URLs to check latest versions and download
+VERSION_URL = "https://raw.githubusercontent.com/mrzico69/thbd_tools/main/version.txt"
+WORDLIST_VERSION_URL = "https://raw.githubusercontent.com/mrzico69/wordlists/refs/heads/main/wordlist_version.txt"
+TOOL_UPDATE_URL = "https://raw.githubusercontent.com/mrzico69/thbd_tools/main/thbd_tools.py"
+
+# Wordlist URLs and paths
+DEFAULT_WORDLIST_PATH = os.path.join(SCRIPT_DIR, "admin-finder.txt")
+WORDLIST_DOWNLOAD_URL = "https://raw.githubusercontent.com/mrzico69/wordlists/main/admin-finder.txt"
+
+DIR_BRUTE_PATH = os.path.join(SCRIPT_DIR, "dir-brute.txt")
+DIR_BRUTE_URL = "https://raw.githubusercontent.com/mrzico69/wordlists/main/dir-brute.txt"
+
+DEFAULT_USR_PATH = os.path.join(SCRIPT_DIR, "default_usr.txt")
+DEFAULT_PASS_PATH = os.path.join(SCRIPT_DIR, "default_pass.txt")
+DEFAULT_USR_URL = "https://raw.githubusercontent.com/mrzico69/wordlists/refs/heads/main/default_usr.txt"
+DEFAULT_PASS_URL = "https://raw.githubusercontent.com/mrzico69/wordlists/refs/heads/main/default_pass.txt"
+
+
+def download_file(url, filepath):
+    try:
+        print(Fore.YELLOW + f"[*] Downloading: {url}" + Style.RESET_ALL)
+        r = requests.get(url, timeout=20)
+        r.raise_for_status()
+        with open(filepath, "wb") as f:
+            f.write(r.content)
+        print(Fore.GREEN + f"[✓] Downloaded to {filepath}" + Style.RESET_ALL)
+    except Exception as e:
+        print(Fore.RED + f"[✗] Download failed: {e}" + Style.RESET_ALL)
+
+
+def update_tool():
+    print(Fore.MAGENTA + "[⬆️] Updating tool..." + Style.RESET_ALL)
+    try:
+        r = requests.get(TOOL_UPDATE_URL, timeout=20)
+        r.raise_for_status()
+        with open(__file__, "wb") as f:
+            f.write(r.content)
+        print(Fore.GREEN + "[✓] Tool updated. Restart to apply changes." + Style.RESET_ALL)
+        sys.exit(0)
+    except Exception as e:
+        print(Fore.RED + f"[✗] Tool update failed: {e}" + Style.RESET_ALL)
+
+
+def update_wordlists():
+    print(Fore.MAGENTA + "[⬆️] Updating wordlists..." + Style.RESET_ALL)
+    try:
+        download_file(WORDLIST_DOWNLOAD_URL, DEFAULT_WORDLIST_PATH)
+        download_file(DIR_BRUTE_URL, DIR_BRUTE_PATH)
+        download_file(DEFAULT_USR_URL, DEFAULT_USR_PATH)
+        download_file(DEFAULT_PASS_URL, DEFAULT_PASS_PATH)
+        print(Fore.GREEN + "[✓] Wordlists updated successfully." + Style.RESET_ALL)
+    except Exception as e:
+        print(Fore.RED + f"[✗] Wordlist update failed: {e}" + Style.RESET_ALL)
+
+
+def auto_check_update():
+    print(Fore.CYAN + "[*] Checking for updates..." + Style.RESET_ALL)
+
+    # Check tool version
+    try:
+        r = requests.get(VERSION_URL, timeout=10)
+        r.raise_for_status()
+        latest_tool_version = r.text.strip()
+        if latest_tool_version != TOOL_VERSION:
+            print(Fore.YELLOW + f"[!] New tool version available: {latest_tool_version} (Current: {TOOL_VERSION})" + Style.RESET_ALL)
+            update_tool()
+            return
+        else:
+            print(Fore.GREEN + "[✓] Tool is up to date." + Style.RESET_ALL)
+    except Exception as e:
+        print(Fore.RED + f"[✗] Tool version check failed: {e}" + Style.RESET_ALL)
+
+    # Check wordlist version
+    try:
+        r = requests.get(WORDLIST_VERSION_URL, timeout=10)
+        r.raise_for_status()
+        latest_wordlist_version = r.text.strip()
+
+        global WORDLIST_VERSION
+        if latest_wordlist_version != WORDLIST_VERSION:
+            print(Fore.YELLOW + f"[!] Wordlist update available: {latest_wordlist_version} (Current: {WORDLIST_VERSION})" + Style.RESET_ALL)
+            update_wordlists()
+
+            # Save new version locally
+            with open(os.path.join(SCRIPT_DIR, "wordlist_version_local.txt"), "w") as f:
+                f.write(latest_wordlist_version)
+
+            WORDLIST_VERSION = latest_wordlist_version
+        else:
+            print(Fore.GREEN + "[✓] Wordlists are up to date." + Style.RESET_ALL)
+    except Exception as e:
+        print(Fore.RED + f"[✗] Wordlist version check failed: {e}" + Style.RESET_ALL)
+
+
+
+
 # Initialize colorama for colorful terminal output
 init(autoreset=True)
 
@@ -602,4 +712,5 @@ def main_menu():
 # =====================
 
 if __name__ == "__main__":
+    auto_check_update()
     main_menu()
