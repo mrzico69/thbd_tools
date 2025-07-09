@@ -19,7 +19,7 @@ from colorama import init, Fore, Style
 # Your current local versions
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-TOOL_VERSION = "3.0"
+TOOL_VERSION = "3.1"
 
 try:
     with open(os.path.join(SCRIPT_DIR, "wordlist_version_local.txt"),
