@@ -35,10 +35,10 @@ TOOL_UPDATE_URL = "https://raw.githubusercontent.com/mrzico69/thbd_tools/main/th
 
 # Wordlist URLs and paths
 DEFAULT_WORDLIST_PATH = os.path.join(SCRIPT_DIR, "admin-finder.txt")
-WORDLIST_DOWNLOAD_URL = "https://raw.githubusercontent.com/mrzico69/wordlists/main/admin-finder.txt"
+WORDLIST_DOWNLOAD_URL = "https://raw.githubusercontent.com/mrzico69/wordlists/refs/heads/main/admin-finder.txt"
 
 DIR_BRUTE_PATH = os.path.join(SCRIPT_DIR, "dir-brute.txt")
-DIR_BRUTE_URL = "https://raw.githubusercontent.com/mrzico69/wordlists/main/dir-brute.txt"
+DIR_BRUTE_URL = "https://raw.githubusercontent.com/mrzico69/wordlists/refs/heads/main/dir-brute.txt"
 
 DEFAULT_USR_PATH = os.path.join(SCRIPT_DIR, "default_usr.txt")
 DEFAULT_PASS_PATH = os.path.join(SCRIPT_DIR, "default_pass.txt")
@@ -147,13 +147,13 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_WORDLIST_FILENAME = "admin-finder.txt"
 DEFAULT_WORDLIST_PATH = os.path.join(SCRIPT_DIR, DEFAULT_WORDLIST_FILENAME)
 WORDLIST_DOWNLOAD_URL = (
-    "https://raw.githubusercontent.com/mrzico69/wordlists/main/admin-finder.txt"
+    "https://raw.githubusercontent.com/mrzico69/wordlists/refs/heads/main/admin-finder.txt"
 )
 
 DIR_BRUTE_FILENAME = "dir-brute.txt"
 DIR_BRUTE_PATH = os.path.join(SCRIPT_DIR, DIR_BRUTE_FILENAME)
 DIR_BRUTE_URL = (
-    "https://raw.githubusercontent.com/mrzico69/wordlists/main/dir-brute.txt")
+    "https://raw.githubusercontent.com/mrzico69/wordlists/refs/heads/main/dir-brute.txt")
 
 # Default login brute force username/password lists
 DEFAULT_USR_FILENAME = "default_usr.txt"
@@ -715,8 +715,8 @@ def sqli_beast_tool():
         return
 
     # Wordlists URLs
-    union_wordlist_url = "https://raw.githubusercontent.com/mrzico69/wordlists/main/unionselect_bypass_wordlist.txt"
-    orderby_wordlist_url = "https://raw.githubusercontent.com/mrzico69/wordlists/main/orderby_wordlist.txt"
+    union_wordlist_url = "https://raw.githubusercontent.com/mrzico69/wordlists/refs/heads/main/unionselect_bypass_wordlist.txt"
+    orderby_wordlist_url = "https://raw.githubusercontent.com/mrzico69/wordlists/refs/heads/main/orderby_wordlist.txt"
 
     union_wordlist_file = "unionselect_bypass_wordlist.txt"
     orderby_wordlist_file = "orderby_wordlist.txt"
