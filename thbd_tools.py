@@ -19,7 +19,7 @@ from colorama import init, Fore, Style
 # Your current local versions
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-TOOL_VERSION = "3.1"
+TOOL_VERSION = "3.2"
 
 try:
     with open(os.path.join(SCRIPT_DIR, "wordlist_version_local.txt"),
@@ -817,10 +817,6 @@ def sqli_beast_tool():
 
 
 def full_recon_combo_txt():
-    import os, requests, socket, time, whois, dns.resolver, re, shodan
-    from bs4 import BeautifulSoup
-    from urllib.parse import urljoin
-
     print("\n[*] THBD FULL RECON BEAST MODE (TXT REPORT)\n")
     target = input("Enter target domain (example.com): ").strip()
     shodan_api_key = input(
@@ -1047,6 +1043,57 @@ def full_recon_combo_txt():
     print("\n[+] Recon complete! Report saved as recon_report.txt\n")
 
 
+#REV IP LOOKUP 
+
+def rev_ip():
+    print("\n[*] THBD Reverse IP Lookup\n")
+
+    website = input("Enter target domain (without http/https): ").strip()
+    website = website.replace('http://', '').replace('https://', '').replace('/', '')
+
+    try:
+        ip = socket.gethostbyname(website)
+        print(f"[+] Resolved IP: {ip}")
+    except socket.gaierror:
+        print("[-] Error: Could not resolve domain.")
+        return
+
+    url = f"https://rev-ip.onrender.com/?key=Flashx&ip={ip}"
+
+    try:
+        response = requests.get(url, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            domains = data.get("domains", [])
+
+            if not domains:
+                print("[-] No domains found.")
+                return
+
+            print("\n[+] Found Domains:\n")
+            for d in domains:
+                print(d)
+
+            file_name = input("\nEnter report file name (without .txt) or press Enter to skip saving: ").strip()
+
+            if file_name:
+                if not file_name.endswith(".txt"):
+                    file_name += ".txt"
+
+                with open(file_name, "w") as f:
+                    for d in domains:
+                        f.write(d + "\n")
+                print(f"\n[+] Results saved to {file_name}")
+            else:
+                print("\n[+] Display only mode. No file saved.")
+
+        else:
+            print(f"[-] Server returned status code {response.status_code}")
+
+    except requests.exceptions.RequestException as e:
+        print(f"[-] Request failed: {e}")
+
+
 #==========================
 # === UPDATE FUNCTIONS ===
 # =====================
@@ -1099,8 +1146,9 @@ def main_menu():
         print("7. Login Page Brute Force")
         print("8. SQLi Bypass Wordlist Test")
         print("9.ALL IN ONE RECON")
-        print("10. Update Tool (program)")
-        print("11. Update Default Wordlists")
+        print("10. Rev IP lookup")
+        print("11. Update Tool (program)")
+        print("12. Update Default Wordlists")       
         print("0. Exit")
 
         choice = input("\nYour choice: ").strip()
@@ -1129,9 +1177,12 @@ def main_menu():
         elif choice == "9":
             full_recon_combo_txt()
         elif choice == "10":
-            update_tool()
+            rev_ip()
         elif choice == "11":
             update_wordlist()
+        elif choice == "12":
+            update_tool()
+
         elif choice == "0":
             print(Fore.CYAN + "👋 Bye! Stay sharp, THBD Community 💻⚔️" +
                   Style.RESET_ALL)
