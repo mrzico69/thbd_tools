@@ -44,7 +44,8 @@ THBD Tools is a powerful, modular command-line tool designed for penetration tes
 Run the main program:
 ```bash
 python thbd_tools.py
----
+ ```
+
 
 **Happy hacking! 💻⚔️**
 
